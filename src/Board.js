@@ -3,8 +3,8 @@ import React from 'react';
 function Square(props) {
     return (
       <button 
-        className={`square ${props.isWinner(props.index) ? "winning-square" : ""}`}
-        onClick={props.onClick}
+        className={`square ${props.isWinner.includes(props.index) ? "winning-square" : ""}`}
+        onClick={(e) => props.onClick()}
       >
           {props.value}
       </button>
@@ -15,9 +15,10 @@ class Board extends React.Component {
     renderSquare(i) {
       return (
         <Square
+        key={i}
         value={this.props.squares[i]} 
         onClick={() => this.props.onClick(i)}
-        isWinner={this.props.isWinner}
+        isWinner={this.props.isWinner(this.props.squares) ? this.props.isWinner(this.props.squares).squares : []}
         index={i}
         />
       );
@@ -40,7 +41,7 @@ class Board extends React.Component {
 
       for (let i = 0; i < 4; i++) {
         rows.push(
-                  <div className="board-row">
+                  <div className="board-row" key={i}>
                     {this.renderRow(indexIncrement)}
                   </div>
                 );

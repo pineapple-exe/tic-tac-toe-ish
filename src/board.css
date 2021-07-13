@@ -16,7 +16,6 @@ body {
   .square {
     background: #fff;
     border: 1px solid #999;
-    float: left;
     font-size: 24px;
     font-weight: bold;
     line-height: 34px;
@@ -45,7 +44,7 @@ body {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .game-info {
     margin-left: 20px;
   }
