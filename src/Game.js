@@ -2,11 +2,9 @@ import React from "react";
 import Board from "./Board";
 
 export default function Game(props) {
-  const [history, setHistory] = React.useState([{squares: Array(16).fill(null), move: null}]);
+  const [history, setHistory] = React.useState([{squares: Array(16).fill(null), move: null, winnerEntity: null}]);
   const [stepNumber, setStepNumber] = React.useState(0);
   const [xIsNext, setXIsNext] = React.useState(true);
-  // const [winner, setWinner] = React.useState(null);
-  // const [status, setStatus] = React.useState(props.players.playerX);
 
   const generateCoordinate = (position, move) => {
     let col;
@@ -47,7 +45,11 @@ export default function Game(props) {
       const [a, b, c, d] = lines[i];
 
       if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c] && squares[a] === squares[d]) {
-        return { winner: (squares[a] === 'X' ? props.players.playerX : props.players.playerO), squares: [a, b, c, d] }
+        const winnerName = squares[a] === 'X' ? 
+                           props.players.playerX : 
+                           props.players.playerO;
+
+        return { winner: winnerName, squares: [a, b, c, d] }
       }
     }
     return null;
@@ -55,18 +57,19 @@ export default function Game(props) {
 
   const handleClick = (i) => {
     const historyCopy = history.slice();
-    const current = historyCopy[stepNumber];
-    const currentSquares = current.squares.slice();
-    const winnerEntity = calculateWinner(currentSquares);
+    const latest = historyCopy[stepNumber];
+    const latestSquares = latest.squares.slice();
 
-    if (currentSquares[i] || winnerEntity) {
+    if (latestSquares[i] || latest.winnerEntity) {
         return;
     }
 
-    currentSquares[i] = xIsNext ? 'X' : 'O';
+    latestSquares[i] = xIsNext ? 'X' : 'O';
 
-    const updatedHistory = historyCopy.slice(0, stepNumber + 1).concat({squares: currentSquares, move: generateCoordinate(i, currentSquares[i])});
     const updatedStepNumber = stepNumber + 1;
+    const freshWinnerEntity = calculateWinner(latestSquares);
+    const updatedHistory = historyCopy.slice(0, updatedStepNumber)
+                           .concat({squares: latestSquares, move: generateCoordinate(i, latestSquares[i]), winnerEntity: freshWinnerEntity});
 
     setHistory(updatedHistory);
     setStepNumber(updatedStepNumber);
@@ -76,18 +79,23 @@ export default function Game(props) {
   const timeTravel = (step) => {
     setStepNumber(step);
     setXIsNext(step % 2 === 0);
-    // setHistory(history.slice(0, step + 1));
+  }
+
+  const clearHistory = () => {
+    setHistory([{squares: Array(16).fill(null), move: null, winnerEntity: null}]);
+    setStepNumber(0);
+    setXIsNext(true);
   }
 
   const status = () => {
     let statusExpression;
-    const winnerEntity = calculateWinner(history[stepNumber].squares);
 
-    if (winnerEntity) {
-      statusExpression = 'Winner: ' + winnerEntity.winner;
+    if (history[stepNumber].winnerEntity) {
+      statusExpression = 'Winner: ' + history[stepNumber].winnerEntity.winner;
     }
     else {
-      statusExpression = 'Turn: ' + xIsNext ? props.players.playerX : props.players.playerO;
+      const nextUp = xIsNext ? props.players.playerX : props.players.playerO;
+      statusExpression = 'Next: ' + nextUp;
     }
 
     return (
@@ -110,11 +118,11 @@ export default function Game(props) {
 
       return (
       <li key={step}>
-        <button onClick={() => timeTravel(step)}>
+        <button className="timestamp" onClick={() => timeTravel(step)}>
           {stepExpression}
         </button>
 
-        <span className="coordinates">
+        <span className="coordinate">
           {coordinateLine}
         </span>
       </li>
@@ -126,7 +134,7 @@ export default function Game(props) {
       <Board
         squares={history[stepNumber].squares}
         onClick={(i) => handleClick(i)}
-        isWinner={() => calculateWinner(history[stepNumber].squares)}
+        isWinner={history.winnerEntity}
       />
       <div className="game-info">
 
@@ -138,6 +146,9 @@ export default function Game(props) {
           {moves}
         </ol>
 
+        <button className="clear" onClick={() => clearHistory()}>
+          Clear history
+        </button>
       </div>
    </div>
   );

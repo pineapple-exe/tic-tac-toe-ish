@@ -1,9 +1,16 @@
 import React from 'react';
 
 function Square(props) {
+  const checkIfWinningSquare = (winnerEntity, index) => {
+    if (!winnerEntity) 
+      return false;
+    else 
+      return winnerEntity.squares.includes(index);
+  }
+
     return (
       <button 
-        className={`square ${props.isWinner.includes(props.index) ? "winning-square" : ""}`}
+        className={`square ${checkIfWinningSquare(props.winnerEntity, props.index) ? "winning-square" : ""}`}
         onClick={(e) => props.onClick()}
       >
           {props.value}
@@ -18,7 +25,7 @@ class Board extends React.Component {
         key={i}
         value={this.props.squares[i]} 
         onClick={() => this.props.onClick(i)}
-        isWinner={this.props.isWinner(this.props.squares) ? this.props.isWinner(this.props.squares).squares : []}
+        winnerEntity={this.props.winnerEntity}
         index={i}
         />
       );
