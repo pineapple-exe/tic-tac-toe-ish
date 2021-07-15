@@ -33,6 +33,10 @@ ol, ul {
   width: 34px;
 }
 
+.winning-square {
+  border: 2px solid rgb(252, 0, 96);
+}
+
 .square:focus {
   outline: none;
 }

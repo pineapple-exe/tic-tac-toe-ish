@@ -8,9 +8,13 @@ function Square(props) {
       return winnerEntity.squares.includes(index);
   }
 
+  const produceClassName = (isWinningSquare) => {
+    return 'square' + (isWinningSquare ? ' winning-square' : '');
+  }
+
     return (
       <button 
-        className={`square ${checkIfWinningSquare(props.winnerEntity, props.index) ? "winning-square" : ""}`}
+        className={produceClassName(checkIfWinningSquare(props.winnerEntity, props.index))}
         onClick={(e) => props.onClick()}
       >
           {props.value}

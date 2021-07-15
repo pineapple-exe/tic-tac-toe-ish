@@ -134,7 +134,7 @@ export default function Game(props) {
       <Board
         squares={history[stepNumber].squares}
         onClick={(i) => handleClick(i)}
-        isWinner={history.winnerEntity}
+        winnerEntity={history[stepNumber].winnerEntity}
       />
       <div className="game-info">
 
