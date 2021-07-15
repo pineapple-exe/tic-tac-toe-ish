@@ -16,7 +16,7 @@ function App() {
     <div className="App">
       {  names.playerX == null ? 
         <Form onSubmit={setNames} parentCallback={handleCallback} /> :
-        <Game playerNames={names} />
+        <Game players={names} />
       }
     </div>
   );

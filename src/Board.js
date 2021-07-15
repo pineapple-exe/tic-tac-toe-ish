@@ -52,7 +52,7 @@ class Board extends React.Component {
 
     render() {  
       return (
-        <div>
+        <div className="game-board">
             {this.renderRows(0)}
         </div>
       );

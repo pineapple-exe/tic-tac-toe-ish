@@ -52,3 +52,7 @@ body {
   .coordinates {
     padding-left: 1rem;
   }
+
+  li {
+    list-style: none;
+  }

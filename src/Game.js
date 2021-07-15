@@ -1,31 +1,33 @@
 import React from "react";
 import Board from "./Board";
 
-const generateCoordinate = (position, move) => {
-  let col;
-  let row;
-
-  const positions = [
-    [0, 1, 2, 3],
-    [4, 5, 6, 7],
-    [8, 9, 10, 11],
-    [12, 13, 14, 15]
-  ];
-
-  for (let i = 0; i < positions.length; i++) {
-    if (positions[i].includes(position)) {
-      row = i;
-      col = positions[i].indexOf(position);
-      break;
-    }
-  }
-  return `${col},${row}: ${move}`;
-}
-
 export default function Game(props) {
   const [history, setHistory] = React.useState([{squares: Array(16).fill(null), move: null}]);
   const [stepNumber, setStepNumber] = React.useState(0);
   const [xIsNext, setXIsNext] = React.useState(true);
+  // const [winner, setWinner] = React.useState(null);
+  // const [status, setStatus] = React.useState(props.players.playerX);
+
+  const generateCoordinate = (position, move) => {
+    let col;
+    let row;
+  
+    const positions = [
+      [0, 1, 2, 3],
+      [4, 5, 6, 7],
+      [8, 9, 10, 11],
+      [12, 13, 14, 15]
+    ];
+  
+    for (let i = 0; i < positions.length; i++) {
+      if (positions[i].includes(position)) {
+        row = i;
+        col = positions[i].indexOf(position);
+        break;
+      }
+    }
+    return `${col},${row}: ${move}`;
+  }
 
   const calculateWinner = (squares) => {
     const lines = [
@@ -45,7 +47,7 @@ export default function Game(props) {
       const [a, b, c, d] = lines[i];
 
       if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c] && squares[a] === squares[d]) {
-        return { winner: squares[a], squares: [a, b, c, d] }
+        return { winner: (squares[a] === 'X' ? props.players.playerX : props.players.playerO), squares: [a, b, c, d] }
       }
     }
     return null;
@@ -53,7 +55,7 @@ export default function Game(props) {
 
   const handleClick = (i) => {
     const historyCopy = history.slice();
-    const current = historyCopy[history.length - 1];
+    const current = historyCopy[stepNumber];
     const currentSquares = current.squares.slice();
     const winnerEntity = calculateWinner(currentSquares);
 
@@ -63,49 +65,81 @@ export default function Game(props) {
 
     currentSquares[i] = xIsNext ? 'X' : 'O';
 
-    const updatedHistory = historyCopy.concat({squares: currentSquares, move: generateCoordinate(i, currentSquares[i])});
+    const updatedHistory = historyCopy.slice(0, stepNumber + 1).concat({squares: currentSquares, move: generateCoordinate(i, currentSquares[i])});
+    const updatedStepNumber = stepNumber + 1;
 
     setHistory(updatedHistory);
-    setStepNumber(history.length);
+    setStepNumber(updatedStepNumber);
     setXIsNext(!xIsNext);
   }
 
+  const timeTravel = (step) => {
+    setStepNumber(step);
+    setXIsNext(step % 2 === 0);
+    // setHistory(history.slice(0, step + 1));
+  }
+
+  const status = () => {
+    let statusExpression;
+    const winnerEntity = calculateWinner(history[stepNumber].squares);
+
+    if (winnerEntity) {
+      statusExpression = 'Winner: ' + winnerEntity.winner;
+    }
+    else {
+      statusExpression = 'Turn: ' + xIsNext ? props.players.playerX : props.players.playerO;
+    }
+
+    return (
+        <p>{statusExpression}</p>
+    );
+  }
+
+  const moves = history.map((snapShot, step) => {
+      const desc = step ? 
+      'Go to move # ' + step :
+      'Go to game start';
+
+      const stepExpression = (step === stepNumber) ? 
+                              <b>{desc}</b> : 
+                              desc;
+
+      const coordinateLine = step > 0 ? 
+      'Coordinate: ' + snapShot.move
+      : null;
+
+      return (
+      <li key={step}>
+        <button onClick={() => timeTravel(step)}>
+          {stepExpression}
+        </button>
+
+        <span className="coordinates">
+          {coordinateLine}
+        </span>
+      </li>
+      );
+  });
+
   return (
-    <Board
-      squares={history[history.length - 1].squares}
-      onClick={(i) => handleClick(i)}
-      isWinner={() => calculateWinner(history[history.length - 1].squares.slice())}
-    />
-    // <GameInfo />
+    <div className="game">
+      <Board
+        squares={history[stepNumber].squares}
+        onClick={(i) => handleClick(i)}
+        isWinner={() => calculateWinner(history[stepNumber].squares)}
+      />
+      <div className="game-info">
+
+        <div className="status">
+          {status()}
+        </div>
+
+        <ol className="moves">
+          {moves}
+        </ol>
+
+      </div>
+   </div>
   );
 }
-
-// function GameInfo(props) {
-
-//   const timeTravel = (step) => {
-//     setStepNumber(step);
-//   }
-// const moves = history.map((snapShot, step) => {
-//     const desc = step ? 
-//     'Go to move # ' + step :
-//     'Go to game start';
-
-//     const stepExpression = (step === this.state.stepNumber) ? 
-//                             <b>{desc}</b> : 
-//                             desc;
-
-//     const coordinateLine = history.map((obj) => obj.coordinates).some(value => value != null);
-//     const visibleCoordinateLine = coordinateLine ? history.map((obj) => obj.coordinates).toString().replace(',', '') : '';
-
-//     return (
-//       <li key={step}>
-//         <button onClick={() => this.timeTravel(step)}>
-//           {stepExpression}
-//         </button>
-//         <span className="coordinates">
-//           {'Coordinates: ' + visibleCoordinateLine}
-//         </span>
-//       </li>
-//     );
-//   });
 
